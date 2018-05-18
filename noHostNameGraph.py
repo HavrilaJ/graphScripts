@@ -1,4 +1,4 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
 import sys
 import os
 from plotly.offline import plot
@@ -7,10 +7,10 @@ import plotly.graph_objs as go
 import csv
 from collections import OrderedDict, Counter
 import datetime
-#path = '/var/www/pakiti-analysis/egi/data/results'
-#pathGraph = '/var/www/pakiti-analysis/egi/data/hostFullGraph/'
-path = '/home/jakub/Documents/results1'
-pathGraph = ''
+
+path = '/var/www/pakiti-analysis/egi/data/results'
+pathGraph = '/var/www/pakiti-analysis/egi/data/noHostNameGraph/'
+
 def fileProcess(file,egiType):
     filename = path + '/' + file
     with open(filename, 'r') as csvfile:
@@ -65,15 +65,18 @@ def fileSelector(dateFrom, dateTo, egiType):
     
 
 def graphReport():
-    if len(res.keys()) > 15:
-        first10 = OrderedDict(sorted(res.items(), key=lambda x: x[1], reverse=True))
-        labels = [list(first10.keys())[i]+' - '+str(list(first10.values())[i])  for i in range(30)]
-        values = [list(first10.values())[i] for i in range(30)]
+    labels = []
+    values = []
+    if len(res.keys()) > 20:
+        first20 = OrderedDict(sorted(res.items(), key=lambda x: x[1], reverse=True))
+        labels = [list(first20.keys())[i]+' - '+str(list(first20.values())[i])  for i in range(20)]
+        values = [list(first20.values())[i] for i in range(20)]
     else:
-        labels = list(res.keys())
-        values = list(res.values())
+        for key, value in res.items():
+            labels.append(key+' - '+str(value))
+            values.append(value)    		
     trace = go.Pie(labels = labels, values = values, textinfo='label', hoverinfo='label')
-    layout = go.Layout(title='Stats', width=800, height=640)
+    layout = go.Layout(title="Analysis", autosize=True)
     fig = go.Figure(data = [trace], layout = layout)
     if len(sys.argv) == 2 and sys.argv[1] == 'pngLastWeek':
         py.image.save_as(fig, filename=oFilename+'.png')

@@ -1,18 +1,23 @@
-#!/usr/bin/python3.5
-import sys
-import os
+#!/usr/bin/python3
+
+#import plotly
 from plotly.offline import plot
 import plotly.plotly as py
 import plotly.graph_objs as go
+
 import csv
+import os
+import sys
 from collections import OrderedDict, Counter
 import datetime
 
-#path = '/var/www/pakiti-analysis/egi/data/results'
-#pathGraph = '/var/www/pakiti-analysis/egi/data/hostFullGraph/'
-path = '/home/jakub/Documents/results1'
-pathGraph = ''
+#path - where are files storaged
+path = '/var/www/pakiti-analysis/egi/data/results'
 
+#pathGraph - where graph is saved
+pathGraph = '/var/www/pakiti-analysis/egi/data/hostFullGraph/'
+
+#fileProcess - process file with egi type
 def fileProcess(file, egiType):
     filename = path + '/' + file
     with open(filename, 'r') as csvfile:
@@ -33,6 +38,8 @@ def fileProcess(file, egiType):
 
 result = Counter()
 oFilename = ""
+
+#fileSelector - select files according to parameters
 def fileSelector(dateFrom, dateTo, egiType):
     global result
     global oFilename
@@ -47,7 +54,7 @@ def fileSelector(dateFrom, dateTo, egiType):
             if (file.split('.')[0] >= dateFrom) and (file.split('.')[0] <= dateTo):
                 result += fileProcess(file, egiType)  
 
-
+#create graph
 def graphReport():
     global result
     result = dict(result)
@@ -59,14 +66,15 @@ def graphReport():
         labels = list(result.keys())
         values = list(result.values())
     trace = go.Pie(labels = labels, values = values, textinfo='label', hoverinfo='label')
-    layout = go.Layout(title='Stats', width=800, height=640)
+    layout = go.Layout(title="Analysis", autosize=True)
     fig = go.Figure(data = [trace], layout = layout)
-    print(oFilename)
+
     if len(sys.argv) == 2 and sys.argv[1]=="pngLastWeek":
         py.image.save_as(fig, filename=oFilename+'.png')
     else:
         return(plot(fig, output_type='div'))
         
+#for cron, to generate last week png graph
 if len(sys.argv) == 2 and sys.argv[1]=="pngLastWeek":
     monday = (datetime.date.today() - datetime.timedelta(days=7)).isoformat()
     sunday = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()

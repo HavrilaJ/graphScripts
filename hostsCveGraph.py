@@ -1,17 +1,22 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
+
+#import plotly
+import plotly.plotly as py
+import plotly.graph_objs as go
+from plotly.offline import plot
+
 import os
 import sys
 import datetime
 import csv
 from collections import Counter, OrderedDict
-import plotly.plotly as py
-import plotly.graph_objs as go
-from plotly.offline import plot
 
-#path = '/var/www/pakiti-analysis/egi/data/results'
-#pathGraph = '/var/www/pakiti-analysis/egi/data/hostsCveGraph/'
-path = '/home/jakub/Documents/results1'
-pathGraph = ''
+#path - where are files storaged
+path = '/var/www/pakiti-analysis/egi/data/results'
+
+#pathGraph - where is graph saved
+pathGraph = '/var/www/pakiti-analysis/egi/data/hostsCveGraph/'
+
 def fileProcess(file, egiType):
     filename = path + '/' + file
     with open(filename, 'r') as csvfile:
@@ -75,7 +80,7 @@ def graphReport():
         y = [result[(items,item)] for items in x]
         data.append(go.Bar(x = x, y = y, name=item))
      
-    layout = go.Layout(title='Stats', width=1500, height=640, barmode='stack')
+    layout = go.Layout(title="Analysis", autosize=True, barmode='stack')
     fig = go.Figure(data = data, layout = layout)
     if len(sys.argv) == 2 and sys.argv[1] == 'pngLastWeek':
         py.image.save_as(fig, filename=oFilename+'.png')

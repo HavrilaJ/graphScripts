@@ -1,17 +1,23 @@
-#!/usr/bin/python3.5
+#!/usr/bin/python3
+
+#imports for creating graph
 import plotly.plotly as py
 import plotly.graph_objs as go
 from plotly.offline import plot
+
 from collections import Counter
 from collections import OrderedDict
 import os
 import sys
 import datetime
 import csv
-#path = '/var/www/pakiti-analysis/egi/data/results'
-#pathGraph = '/var/www/pakiti-analysis/egi/data/cveGraph/'
-path = '/home/jakub/Documents/results1'
-pathGraph = ''
+
+#path - where results are storaged
+path = '/var/www/pakiti-analysis/egi/data/results'
+#pathGraph - where graph is saved
+pathGraph = '/var/www/pakiti-analysis/egi/data/cveGraph/'
+
+#fileProcess - processing file, according to EGI type and agregate information
 def fileProcess(file, egiType):
     filename = path + '/' + file
     with open(filename, 'r') as csvfile:
@@ -33,6 +39,8 @@ def fileProcess(file, egiType):
 
 result = []
 oFilename = ""
+
+#fileSelector - select files between two dates
 def fileSelector(dateFrom, dateTo, egiType):
     for file in os.listdir(path):
         global result
@@ -53,11 +61,13 @@ def fillY(sCVE, CVE, dates):
           else:
                y.append(sCVE.get(dates[i]+ ',' + CVE))
      return y
+
 def stackData(data):
      for i in range(1,len(data)):
           data[i]['y'] = [y0+y1 for y0, y1 in zip(data[i-1]['y'], data[i]['y'])]
      return data
 
+#graphReport - creating graph
 def graphReport():
      global result
      global oFilename
@@ -75,15 +85,16 @@ def graphReport():
      datas = []
      sumC = OrderedDict(sorted(sumC.items(), key=lambda x: x[1]))
      for i in range(len(sumC)):
-         datas.append(go.Scatter(x = dates, y = fillY(sCVE, list(sumC)[i], dates),name = list(sumC)[i], fill='tonexty', line=dict(width='1'),text = fillY(sCVE, list(sumC)[i], dates), hoverinfo='text+name+x'))
+         datas.append(go.Scatter(x = dates, y = fillY(sCVE, list(sumC)[i], dates),name = list(sumC)[i], fill='tonexty', mode='lines', line=dict(width='1'),text = fillY(sCVE, list(sumC)[i], dates), hoverinfo='text+name+x'))
      data = stackData(datas)
-     layout = go.Layout(title=oFilename, width=800, height=640)
+     layout = go.Layout(title="Analysis", autosize=True, hovermode="closest", hoverlabel=dict(namelength=30))
      fig = go.Figure(data = data, layout = layout)
      if len(sys.argv) == 2 and sys.argv[1] == 'html':
-         plot(fig, filename=oFilename, auto_open=False)
+         plot(fig, filename=pathGraph + "timeCveGraph.html", auto_open=False)
      else:
          return(plot(fig, output_type='div'))
 
+#processing files, when script gets argument
 if len(sys.argv) == 2 and sys.argv[1] == 'html':
     fileSelector(None, None, None)
     graphReport()
